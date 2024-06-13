@@ -1,26 +1,27 @@
 version: '3.8'
+name: laravel_template
 
 services:
     app:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: laravel_app
         restart: unless-stopped
-        working_dir: /var/www
+        working_dir: /var/www/ws
         volumes:
-            - ./:/var/www
+            - ./:/var/www/ws
             - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        environment:
+            - UID=${UID}
         depends_on:
             - db
 
     webserver:
         image: nginx:alpine
-        container_name: nginx_webserver
         restart: unless-stopped
         tty: true
         volumes:
-            - ./:/var/www
+            - ./:/var/www/ws
             - ./nginx/conf.d/:/etc/nginx/conf.d/
         ports:
             - "80:80"
@@ -29,7 +30,6 @@ services:
 
     db:
         image: mysql:5.7
-        container_name: laravel_db
         restart: unless-stopped
         tty: true
         ports:
@@ -42,8 +42,7 @@ services:
             SERVICE_TAGS: dev
             SERVICE_NAME: mysql
         volumes:
-            - dbdata:/var/lib/mysql/
+            - app-db-data:/var/lib/mysql
 
 volumes:
-    dbdata:
-        driver: local
+    app-db-data:

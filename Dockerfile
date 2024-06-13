@@ -1,26 +1,29 @@
-# Использование официального образа PHP 8.0 с поддержкой FPM
+# Using the official PHP 8.3 image with FPM support
 FROM php:8.3-fpm
 
-# Установка основных расширений PHP, необходимых для Laravel
-RUN docker-php-ext-install pdo pdo_mysql
+# Installing necessary system packages and PHP extensions
+RUN apt-get update && apt-get install -y \
+    zip \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install zip pdo pdo_mysql
 
-# Получение последней версии Composer
+# Installing Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Установка рабочего каталога внутри контейнера
-WORKDIR /var/www
+# Setting the working directory inside the container
+WORKDIR /var/www/ws
 
-# Копирование приложения в контейнер
-COPY . /var/www/
+# Create a script to change uid/gid and start PHP-FPM
+RUN printf "#!/bin/bash\n\
+usermod -u \${UID} www-data\n\
+chown -R \${UID:?}:\${UID:?} /var/www/ws\n\
+exec \$@" > /docker-entrypoint.sh \
+    && chmod +x /docker-entrypoint.sh
 
-# Установка зависимостей с помощью Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi --no-scripts
-
-# Выставление прав на каталоги для Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# Экспонирование порта 9000, на котором работает PHP-FPM
+# Exposing port 9000 where PHP-FPM runs
 EXPOSE 9000
 
-# Запуск PHP-FPM
+# Starting PHP-FPM through the entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["php-fpm"]
