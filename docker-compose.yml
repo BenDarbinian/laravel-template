@@ -29,20 +29,17 @@ services:
             - app
 
     db:
-        image: mysql:5.7
+        image: mariadb:10.6
         restart: unless-stopped
         tty: true
         ports:
             - "3306:3306"
         environment:
-            MYSQL_DATABASE: local
-            MYSQL_USER: dbu_local
-            MYSQL_PASSWORD: db_secret
-            MYSQL_ROOT_PASSWORD: db_secretroot
-            SERVICE_TAGS: dev
-            SERVICE_NAME: mysql
+            MARIADB_DATABASE: local
+            MARIADB_USER: dbu_local
+            MARIADB_PASSWORD: db_secret
+            MARIADB_ROOT_PASSWORD: db_secretroot
         volumes:
             - app-db-data:/var/lib/mysql
-
 volumes:
     app-db-data:

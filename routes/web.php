@@ -1,7 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\Controller;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::fallback([Controller::class, 'fallback']);
