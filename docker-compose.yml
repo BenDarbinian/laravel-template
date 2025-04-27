@@ -2,7 +2,7 @@ version: '3.8'
 name: laravel-template
 
 services:
-    app:
+    php:
         build:
             context: .
             dockerfile: Dockerfile
@@ -15,7 +15,8 @@ services:
             - UID=${UID}
         depends_on:
             - db
-
+        networks:
+            - app-network
     webserver:
         image: nginx:alpine
         restart: unless-stopped
@@ -26,8 +27,9 @@ services:
         ports:
             - "80:80"
         depends_on:
-            - app
-
+            - php
+        networks:
+            - app-network
     db:
         image: mariadb:10.6
         restart: unless-stopped
@@ -41,5 +43,9 @@ services:
             MARIADB_ROOT_PASSWORD: db_secretroot
         volumes:
             - app-db-data:/var/lib/mysql
+        networks:
+            - app-network
 volumes:
     app-db-data:
+networks:
+    app-network:
